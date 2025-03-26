@@ -1,12 +1,6 @@
 name = "video-page"
 compatibility_date = "2025-03-26"
-
-[build]
-command = "npm run build"
-output_directory = "out"
+main = "./workers-site/index.js"
 
 [site]
-bucket = "out"
-
-[assets]
-directory = "out" 
+bucket = "./out"
