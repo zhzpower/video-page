@@ -4,3 +4,9 @@ main = "./workers-site/index.js"
 
 [site]
 bucket = "./out"
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true
+
+
+

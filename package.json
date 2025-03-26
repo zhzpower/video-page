@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build && node scripts/cloudflare-setup.js",
+    "build": "next build && node scripts/cloudflare-setup.mjs",
     "start": "next start",
     "lint": "next lint"
   },

@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // 配置
 const SOURCE_FILES = ['_redirects', '_headers'];
@@ -30,7 +30,7 @@ if (!fs.existsSync(WORKERS_SITE_DIR)) {
   console.log(`✅ 已创建 ${WORKERS_SITE_DIR}/ 目录`);
 }
 
-// 创建一个简单的worker文件
+// 创建一个简单的worker文件，修复URL处理
 const WORKER_FILE = path.join(WORKERS_SITE_DIR, 'index.js');
 const WORKER_CONTENT = `// This is a placeholder worker for Cloudflare Pages
 addEventListener('fetch', event => {
@@ -38,20 +38,38 @@ addEventListener('fetch', event => {
 })
 
 async function handleRequest(request) {
-  // Get the URL from the request
+  // 获取原始URL
   const url = new URL(request.url)
   
-  // Rewrite the URL to point to the static assets
-  let path = url.pathname
+  // 提取路径
+  let pathname = url.pathname
   
-  // Default to index.html for the root path
-  if (path === '/' || path === '') {
-    path = '/index.html'
+  // 默认首页
+  if (pathname === '/' || pathname === '') {
+    pathname = '/index.html'
   }
   
-  // Try to fetch the static asset
-  const response = await fetch(path)
-  return response
+  // 构建新的请求，使用相同的基本URL但更改路径
+  const assetUrl = new URL(pathname, url.origin)
+  
+  try {
+    // 尝试获取静态资源
+    const response = await fetch(assetUrl)
+    if (response.ok) return response
+    
+    // 如果没有找到资源，返回404页面
+    if (pathname !== '/404.html') {
+      const notFoundResponse = await fetch(new URL('/404.html', url.origin))
+      if (notFoundResponse.ok) return new Response(await notFoundResponse.text(), {
+        status: 404,
+        headers: { 'Content-Type': 'text/html' }
+      })
+    }
+    
+    return response
+  } catch (e) {
+    return new Response('服务器错误，请稍后再试', { status: 500 })
+  }
 }
 `;
 
