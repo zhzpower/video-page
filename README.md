@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 视频订阅管理系统
 
-## Getting Started
+这是一个基于Next.js和Cloudflare Pages的视频订阅管理系统，用于展示和管理视频订阅数据。
 
-First, run the development server:
+## 功能特点
+
+- 从API获取视频订阅数据并展示
+- 支持分页浏览数据
+- 支持搜索筛选功能
+- 支持高亮标记重要条目
+- 响应式设计，适配移动设备
+- 美观的UI界面
+
+## 技术栈
+
+- [Next.js](https://nextjs.org/) - React框架
+- [React](https://reactjs.org/) - JavaScript库
+- [TypeScript](https://www.typescriptlang.org/) - 类型系统
+- [Tailwind CSS](https://tailwindcss.com/) - CSS框架
+- [React Query](https://tanstack.com/query) - 数据获取库
+- [Axios](https://axios-http.com/) - HTTP客户端
+- [React Hot Toast](https://react-hot-toast.com/) - 通知组件
+
+## 快速开始
+
+### 开发环境
 
 ```bash
+# 克隆项目
+git clone [repository-url]
+
+# 进入项目目录
+cd video-page
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 生产构建
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 构建应用
+npm run build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 本地预览生产构建
+npm run start
+```
 
-## Learn More
+## 部署到Cloudflare Pages
 
-To learn more about Next.js, take a look at the following resources:
+1. 将代码推送到GitHub仓库
+2. 在Cloudflare Pages中创建新项目
+3. 连接GitHub仓库
+4. 设置构建命令为 `npm run build`
+5. 设置输出目录为 `out`
+6. 部署完成后，可通过Cloudflare Pages分配的域名访问
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API说明
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+该项目使用以下API获取数据：
 
-## Deploy on Vercel
+- 视频订阅列表：`https://db.video.zhz99.cn/api/subscriptions?page=1`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+API返回的数据结构：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```json
+{
+  "result": {
+    "data": [
+      {
+        "id": 668,
+        "name": "少年歌行 血染天启篇 (2025)",
+        "origin_name": "少年歌行 血染天启篇 (2025) 【更新13 4K】 【热播国漫】",
+        "url": "https://pan.quark.cn/s/1d1c8ef20d15",
+        "source": "quark",
+        "createdAt": "2025-03-26T03:20:38.264Z",
+        "updatedAt": "2025-03-26T03:40:33.928Z"
+      },
+      // ...更多数据
+    ],
+    "pagination": {
+      "current": 2,
+      "pageSize": 50,
+      "total": 694,
+      "totalPages": 14
+    }
+  }
+}
+```
+
+## 本地存储
+
+系统使用浏览器的localStorage存储用户高亮的视频名称，方便用户在下次访问时查看之前已高亮的内容。
+
+## 许可证
+
+[MIT](LICENSE)

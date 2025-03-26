@@ -1,103 +1,137 @@
-import Image from "next/image";
+'use client';
 
+import React, { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { useSubscriptions } from '../hooks/useSubscriptions';
+import SubscriptionItem from '../components/SubscriptionItem';
+import Pagination from '../components/Pagination';
+
+// 创建 React Query 客户端
+const queryClient = new QueryClient();
+
+// 应用容器组件
+function SubscriptionsApp() {
+  const {
+    subscriptions,
+    pagination,
+    isLoading,
+    isError,
+    highlightedNames,
+    handleToggleHighlight,
+    handlePageChange,
+  } = useSubscriptions();
+
+  // 支持搜索功能
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // 过滤订阅数据
+  const filteredSubscriptions = searchTerm
+    ? subscriptions.filter(sub => 
+        sub.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        sub.origin_name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : subscriptions;
+
+  // 高亮项目计数
+  const highlightedCount = filteredSubscriptions.filter(sub => 
+    highlightedNames.includes(sub.name)
+  ).length;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">视频订阅列表</h1>
+        <p className="text-gray-600">浏览和管理您的视频订阅</p>
+      </header>
+
+      {/* 搜索和过滤区 */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg className="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+          </div>
+          <input 
+            type="search" 
+            className="block w-full p-2 pl-10 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500" 
+            placeholder="搜索名称..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <div className="text-gray-700">
+          {highlightedCount > 0 && (
+            <span className="mr-2 px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+              已高亮: {highlightedCount}
+            </span>
+          )}
+          <span className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800">
+            总数: {filteredSubscriptions.length}
+          </span>
+        </div>
+      </div>
+
+      {/* 内容区 */}
+      <div className="mb-8">
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent align-[-0.125em]" role="status">
+              <span className="sr-only">加载中...</span>
+            </div>
+            <p className="mt-2 text-gray-600">加载数据中...</p>
+          </div>
+        ) : isError ? (
+          <div className="text-center py-12 text-red-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="font-medium text-lg">获取数据失败</p>
+            <p className="mt-1">请检查您的网络连接或稍后重试</p>
+          </div>
+        ) : filteredSubscriptions.length === 0 ? (
+          <div className="text-center py-12 text-gray-600">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p className="font-medium text-lg">没有找到订阅数据</p>
+            <p className="mt-1">尝试使用不同的搜索条件</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {filteredSubscriptions.map((subscription) => (
+              <SubscriptionItem
+                key={subscription.id}
+                subscription={subscription}
+                isHighlighted={highlightedNames.includes(subscription.name)}
+                onToggleHighlight={handleToggleHighlight}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 分页区 */}
+      {pagination && filteredSubscriptions.length > 0 && !searchTerm && (
+        <Pagination
+          pagination={pagination}
+          onPageChange={handlePageChange}
+        />
+      )}
+    </div>
+  );
+}
+
+// 主页面组件
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+    <QueryClientProvider client={queryClient}>
+      <main className="min-h-screen bg-gray-50">
+        <SubscriptionsApp />
+        <Toaster position="top-right" />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </QueryClientProvider>
   );
 }

@@ -1,26 +1,42 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --primary: 226 70% 55.5%;
+  --primary-foreground: 226 100% 97%;
+
+  --highlight: 45 100% 64%;
+  --highlight-foreground: 38 92% 38%;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* 添加平滑滚动效果 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 添加对链接的样式 */
+a {
+  color: hsl(var(--primary));
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: hsl(var(--primary) / 0.8);
 }
