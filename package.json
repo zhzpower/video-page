@@ -8,7 +8,8 @@
     "build:cloudflare": "node scripts/cloudflare-setup.mjs",
     "build": "npm run build:next && npm run build:cloudflare",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy": "./scripts/deploy.sh"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.69.0",
